@@ -1,0 +1,15 @@
+onlinecarrental/model/env/
+env
+onlinecarrental/app/__pycache__
+*.pyc  
+*.pyo  
+*.pyd  
+onlinecarrental/onlinecarrental/__pycache__/__init__.cpython-312.pyc
+onlinecarrental/onlinecarrental/__pycache__/__init__.cpython-313.pyc
+onlinecarrental/onlinecarrental/__pycache__/settings.cpython-312.pyc
+onlinecarrental/onlinecarrental/__pycache__/settings.cpython-313.pyc
+onlinecarrental/onlinecarrental/__pycache__/urls.cpython-312.pyc
+onlinecarrental/onlinecarrental/__pycache__/urls.cpython-313.pyc
+onlinecarrental/onlinecarrental/__pycache__/wsgi.cpython-312.pyc
+onlinecarrental/onlinecarrental/__pycache__/wsgi.cpython-313.pyc
+onlinecarrental/model/model_final.pth 

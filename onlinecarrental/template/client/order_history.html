@@ -1,0 +1,69 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order History</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<style>
+    .content{
+        margin-top:10vh;
+    }
+</style>
+<body>
+{% include 'navbar.html'%}
+<div class="container content">
+    <h2 class="mb-4">Order History</h2>
+    {% for order in orders %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5>{{ order.part.part_name }}</h5>
+            <p>Quantity: {{ order.quantity }}</p>
+            <p>Total Price: ₹{{ order.total_price }}</p>
+            <p>Status: {{ order.order_status }}</p>
+            <p>Payment Status: {{ order.payment_status }}</p>
+            <p>Shipping Address: {{ order.shipping_address }}</p>
+            {% if order.order_status == 'Delivered' %}
+            <button class="btn btn-warning btn-sm" data-bs-toggle="modal" 
+                    data-bs-target="#defectModal{{ order.id }}">
+                Report Defect
+            </button>
+            {% endif %}
+            {% if order.order_status == 'Pending' %}
+            <form method="POST" action="{% url 'cancel_order' order.id %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-sm">Cancel Order</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Defect Reporting Modal -->
+    <div class="modal fade" id="defectModal{{ order.id }}" tabindex="-1" aria-labelledby="defectModalLabel{{ order.id }}" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="defectModalLabel{{ order.id }}">Report Defect for Order #{{ order.id }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="{% url 'report_defect' order.id %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="defectDescription" class="form-label">Description of the defect</label>
+                            <textarea class="form-control" id="defectDescription" name="defect_description" rows="3" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit Report</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

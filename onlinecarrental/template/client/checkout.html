@@ -1,0 +1,151 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+</head>
+<body>
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Checkout</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" id="checkoutForm">
+                        {% csrf_token %}
+                        <h5 class="mb-3">Select Delivery Address</h5>
+                        
+                        <!-- Existing Addresses -->
+                        <div class="mb-4">
+                            {% for address in addresses %}
+                            <div class="card mb-2">
+                                <div class="card-body">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" 
+                                               name="address" id="address{{ address.id }}" 
+                                               value="{{ address.id }}" required>
+                                        <label class="form-check-label" for="address{{ address.id }}">
+                                            {{ address.street }}, {{ address.city }}, 
+                                            {{ address.state }} {{ address.postal_code }}
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" 
+                                               name="address" id="newAddress" value="new"
+                                               onclick="toggleNewAddress()">
+                                        <label class="form-check-label" for="newAddress">
+                                            Use new address
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- New Address Fields -->
+                        <div id="newAddressFields" class="mb-4" style="display: none;">
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <input type="text" name="new_street" class="form-control" 
+                                           placeholder="Street Address" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="text" name="new_city" class="form-control" 
+                                           placeholder="City" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="text" name="new_state" class="form-control" 
+                                           placeholder="State" required>
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="text" name="new_postal_code" class="form-control" 
+                                           placeholder="ZIP Code" required>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Order Summary -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-secondary text-white">
+                                <h5>Order Summary</h5>
+                            </div>
+                            <div class="card-body">
+                                {% for item in cart_items %}
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>{{ item.part_name }} (x{{ item.quantity }})</span>
+                                    <span>₹{{ item.total_price }}</span>
+                                </div>
+                                {% endfor %}
+                                <hr>
+                                <div class="d-flex justify-content-between fw-bold">
+                                    <span>Total:</span>
+                                    <span>₹{{ cart_total }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Trigger -->
+                        <button type="button" class="btn btn-primary w-100" 
+                                data-bs-toggle="modal" data-bs-target="#paymentModal">
+                            Proceed to Payment
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Secure Payment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img src="{% static 'images/secure-payment.png' %}" class="img-fluid mb-3" 
+                     alt="Secure Payment" style="max-width: 200px;">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h4>Total Amount: ₹<span id="paymentAmount">{{ cart_total }}</span></h4>
+                    </div>
+                </div>
+                <button class="btn btn-success btn-lg w-100" onclick="processPayment()">
+                    <i class="bi bi-lock"></i> Pay Now
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleNewAddress() {
+    const newAddressFields = document.getElementById('newAddressFields');
+    newAddressFields.style.display = document.getElementById('newAddress').checked ? 'block' : 'none';
+}
+
+function processPayment() {
+    document.getElementById('checkoutForm').submit();
+}
+</script>
+
+<!-- Bootstrap JS and dependencies -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

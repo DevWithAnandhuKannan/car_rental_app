@@ -1,0 +1,92 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Admin Booking Management</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Booking ID</th>
+                <th>Customer</th>
+                <th>Vehicle</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Total Price</th>
+                <th>Booking Status</th>
+                <th>Return Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for booking in bookings %}
+            <tr>
+                <td>{{ booking.id }}</td>
+                <td>{{ booking.customer.user.username }}</td>
+                <td>{{ booking.vehicle.brand }} {{ booking.vehicle.model }}</td>
+                <td>{{ booking.start_date }}</td>
+                <td>{{ booking.end_date }}</td>
+                <td>₹{{ booking.total_price }}</td>
+                <td>{{ booking.booking_status }}</td>
+                <td>{{ booking.return_status }}</td>
+                <td>
+                    {% if booking.booking_status == 'Confirmed' %}
+                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#startModal{{ booking.id }}">
+                        Start Booking
+                    </button>
+                    {% elif booking.booking_status == 'Started' and booking.return_status == 'Pending' %}
+                    <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#returnModal{{ booking.id }}">
+                        Return Vehicle
+                    </button>
+                    {% endif %}
+                </td>
+            </tr>
+
+            <!-- Start Booking Modal -->
+            <div class="modal fade" id="startModal{{ booking.id }}" tabindex="-1" aria-labelledby="startModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="startModalLabel">Start Booking</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="POST" action="{% url 'start_booking' booking.id %}">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label for="otp" class="form-label">Enter OTP</label>
+                                    <input type="text" class="form-control" id="otp" name="otp" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Validate OTP</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Return Vehicle Modal -->
+            <div class="modal fade" id="returnModal{{ booking.id }}" tabindex="-1" aria-labelledby="returnModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="returnModalLabel">Return Vehicle</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="POST" action="{% url 'return_vehicle' booking.id %}">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label for="condition" class="form-label">Vehicle Condition</label>
+                                    <textarea class="form-control" id="condition" name="condition" rows="3" required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-warning">Mark as Returned</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

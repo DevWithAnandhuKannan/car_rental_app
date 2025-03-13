@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Bookings</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --card-hover-shadow: rgba(0, 0, 0, 0.2);
+        }
+
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+        }
+
+
+        .navbar-brand,
+        .nav-link {
+            color: #fff !important;
+            transition: color 0.2s ease;
+        }
+
+        .nav-link:hover {
+            color: #e9ecef !important;
+        }
+
+        .card {
+            transition: all 0.3s ease-in-out;
+            border: none;
+            border-radius: 10px;
+            background-color: #fff;
+        }
+
+        .card:hover {
+            box-shadow: 0 5px 15px var(--card-hover-shadow);
+            transform: translateY(-2px);
+        }
+
+        .card-title {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .card-text strong {
+            color: #444;
+            font-weight: 500;
+        }
+
+        .badge {
+            font-size: 0.875rem;
+            padding: 0.35em 0.65em;
+            border-radius: 0.5rem;
+        }
+
+        .img-fluid {
+            transition: transform 0.3s ease;
+        }
+
+        .img-fluid:hover {
+            transform: scale(1.02);
+        }
+
+        .btn-sm {
+            border-radius: 5px;
+            padding: 0.375rem 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .col-md-4 img {
+                height: 180px !important;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    {% include 'navbar.html' %}
+
+    <!-- Booking Section -->
+    <div class="container mt-5 mb-5">
+        <br>
+        <br>
+        <br>
+        <h1>My Bookings</h1>
+        <br>
+        <div class="row" id="container">
+            {% for booking in bookings %}
+                <div class="col-lg-12 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="row g-0">
+                            <!-- Vehicle Image -->
+                            <div class="col-md-4">
+                                <img src="{{ booking.vehicle.image.url }}"
+                                     class="img-fluid rounded-start w-100"
+                                     alt="{{ booking.vehicle.brand }} {{ booking.vehicle.model }}"
+                                     style="height: 250px; object-fit: cover;">
+                            </div>
+
+                            <!-- Booking Details -->
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <h5 class="card-title">{{ booking.vehicle.brand }} {{ booking.vehicle.model }}</h5>
+                                            <p class="card-text">
+                                                <strong>Number Plate:</strong> {{ booking.vehicle.number_plate }}<br>
+                                                <strong>Fuel Type:</strong> {{ booking.vehicle.fuel_type }}<br>
+                                                <strong>Transmission:</strong> {{ booking.vehicle.transmission_type }}<br>
+                                                <strong>Seats:</strong> {{ booking.vehicle.seats }}<br>
+                                                <strong>Vehicle Type:</strong> {{ booking.vehicle.vehicle_type }}
+                                            </p>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <p class="card-text">
+                                                <strong>Booking Dates:</strong> 
+                                                <span class="text-dark">{{ booking.start_date }} → {{ booking.end_date }}</span><br>
+                                                <strong>Total Price:</strong> 
+                                                <span class="fw-bold text-success">₹{{ booking.total_price }}</span><br>
+                                                <strong>Booking Status:</strong> 
+                                                <span class="badge {% if booking.booking_status == 'Confirmed' %}bg-success{% else %}bg-danger{% endif %}">
+                                                    {{ booking.booking_status }}
+                                                </span><br>
+                                                <strong>Payment Status:</strong> 
+                                                <span class="badge {% if booking.payment_status == 'Paid' %}bg-success{% else %}bg-warning text-dark{% endif %}">
+                                                    {{ booking.payment_status }}
+                                                </span><br>
+                                                <strong>OTP:</strong> 
+                                                <span class="text-muted">{{ booking.otp }}</span>
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Action Buttons -->
+                                    <div class="mt-3">
+                                        {% if booking.booking_status == 'Confirmed' and booking.can_be_canceled %}
+                                            <form method="POST" action="{% url 'cancel_booking' booking.id %}" class="d-inline">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-danger btn-sm">
+                                                    <i class="bi bi-x-circle me-1"></i>Cancel Booking
+                                                </button>
+                                            </form>
+                                        {% elif booking.booking_status == 'Confirmed' %}
+                                            <button class="btn btn-secondary btn-sm" disabled>
+                                                Cancellation not allowed (less than 2 days)
+                                            </button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-info text-center py-4">
+                        <i class="bi bi-info-circle me-2"></i>No bookings found
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

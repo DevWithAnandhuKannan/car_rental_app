@@ -1,0 +1,125 @@
+
+{% extends 'admin/base.html' %}
+{% load static %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Spare Parts Management</h2>
+    
+    <!-- Search Bar -->
+    <input type="text" id="searchInput" class="form-control mb-3" placeholder="Search spare parts..." onkeyup="searchParts()">
+    
+    <!-- Button to Open the Modal -->
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#sparePartModal" onclick="resetForm()">
+        Add Spare Part
+    </button>
+    
+    <!-- Spare Parts Table -->
+    <table class="table table-bordered mt-3" id="sparePartsTable">
+        <thead>
+            <tr>
+                <th>Part Name</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Car Compatibility</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for part in spare_parts %}
+            <tr>
+                <td>{{ part.part_name }}</td>
+                <td>{{ part.category }}</td>
+                <td>{{ part.price }}</td>
+                <td>{{ part.stock_quantity }}</td>
+                <td>{{ part.car_compatibility }}</td>
+                <td>
+                    <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#sparePartModal" 
+                        onclick="editPart('{{ part.id }}', '{{ part.part_name }}', '{{ part.category }}', '{{ part.price }}', '{{ part.stock_quantity }}', '{{ part.car_compatibility }}', '{{ part.sku }}')">
+                        Edit
+                    </button>
+                    <a href="/delete_spare_part/{{ part.id }}/" class="btn btn-danger" onclick="return confirm('Are you sure?');">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Spare Part Modal -->
+<div class="modal fade" id="sparePartModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Spare Part</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" enctype="multipart/form-data" id="sparePartForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="part_id" id="part_id">
+                    
+                    <div class="mb-3">
+                        <label>Part Name</label>
+                        <input type="text" class="form-control" id="part_name" name="part_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Category</label>
+                        <select class="form-control" id="category" name="category">
+                            <option value="Engine">Engine</option>
+                            <option value="Brake">Brake</option>
+                            <option value="Suspension">Suspension</option>
+                            <option value="Electrical">Electrical</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label>Price</label>
+                        <input type="number" class="form-control" id="price" name="price" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Stock Quantity</label>
+                        <input type="number" class="form-control" id="stock_quantity" name="stock_quantity" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Car Compatibility</label>
+                        <input type="text" class="form-control" id="car_compatibility" name="car_compatibility" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Image</label>
+                        <input type="file" class="form-control" id="image" name="image">
+                    </div>
+                    <button type="submit" class="btn btn-success">Save</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function searchParts() {
+        let input = document.getElementById("searchInput").value.toLowerCase();
+        let rows = document.querySelectorAll("#sparePartsTable tbody tr");
+        rows.forEach(row => {
+            let text = row.innerText.toLowerCase();
+            row.style.display = text.includes(input) ? "" : "none";
+        });
+    }
+
+    function editPart(id, name, category, price, stock, compatibility, sku) {
+        document.getElementById("part_id").value = id;
+        document.getElementById("part_name").value = name;
+        document.getElementById("category").value = category;
+        document.getElementById("price").value = price;
+        document.getElementById("stock_quantity").value = stock;
+        document.getElementById("car_compatibility").value = compatibility;
+        document.getElementById("sparePartForm").action = `/update_spare_part/${id}/`;
+    }
+
+    function resetForm() {
+        document.getElementById("sparePartForm").reset();
+        document.getElementById("part_id").value = "";
+        document.getElementById("sparePartForm").action = "/add_spare_part/";
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,212 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Available Spare Parts</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+</head>
+<style>
+.content {
+    margin-top: 100px;
+}
+</style>
+<body>
+    {% include 'navbar.html' %}
+    <div class="container content">
+        <h2 class="mb-4 text-left">Available Spare Parts</h2>
+
+        <!-- Search Input -->
+        <div class="mb-3">
+            <input type="text" id="searchInput" class="form-control" placeholder="Search for spare parts...">
+        </div>
+
+        <div class="row">
+            <!-- Parts Listing (Scrollable) -->
+            <div class="col-md-8">
+                <div style="max-height: 600px;" id="partsContainer">
+                    {% for part in parts %}
+                    <div class="row mb-4 part-item" data-name="{{ part.part_name }}" data-category="{{ part.category }}">
+                        <div class="col-md-12">
+                            <div class="card h-100 shadow-sm">
+                                <div class="row g-0">
+                                    <div class="col-md-4">
+                                        <img src="{{ part.image.url }}" class="img-fluid rounded-start"
+                                             alt="{{ part.part_name }}" style="height: 200px; object-fit: contain;">
+                                    </div>
+                                    <div class="col-md-8">
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ part.part_name }}</h5>
+                                            <p class="card-text">
+                                                <strong>Category:</strong> {{ part.category }}<br>
+                                                <strong>Price:</strong> ₹{{ part.price }}<br>
+                                                <strong>In Stock:</strong> {{ part.stock_quantity }}<br>
+                                                <strong>Compatibility:</strong> {{ part.car_compatibility }}
+                                            </p>
+                                            <form class="add-to-cart-form" data-part-id="{{ part.id }}">
+                                                {% csrf_token %}
+                                                <div class="input-group">
+                                                    <input type="number" class="form-control"
+                                                           name="quantity" min="1" max="{{ part.stock_quantity }}"
+                                                           value="1" required>
+                                                    <button type="submit" class="btn btn-primary">
+                                                        <i class="bi bi-cart-plus"></i> Add to Cart
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Cart Sidebar -->
+            <div class="col-md-4">
+                <div class="card shadow sticky-top">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Your Cart</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="cart-items">
+                            {% if cart.items %}
+                                <div>
+                                    {% for item in cart.items %}
+                                        <div class="cart-item mb-3">
+                                            <div class="d-flex justify-content-between">
+                                                <span>{{ item.part_name }}</span>
+                                                <span>₹{{ item.total_price }}</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between small">
+                                                <span>Qty: {{ item.quantity }}</span>
+                                                <a href="#" class="text-danger" onclick="removeFromCart({{ item.part_id }})">Remove</a>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <h5>Total Amount: ₹{{ cart.total }}</h5>
+                            {% else %}
+                                <p class="text-center">Your cart is empty.</p>
+                            {% endif %}
+                        </div>
+                        <div class="d-grid gap-2 mt-3">
+                            <a href="{% url 'checkout' %}" class="btn btn-success">Proceed to Checkout</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- JavaScript for Search Filter -->
+    <script>
+        document.getElementById("searchInput").addEventListener("input", function () {
+            let searchValue = this.value.toLowerCase();
+            let parts = document.querySelectorAll(".part-item");
+
+            parts.forEach(part => {
+                let name = part.getAttribute("data-name").toLowerCase();
+                let category = part.getAttribute("data-category").toLowerCase();
+
+                if (name.includes(searchValue) || category.includes(searchValue)) {
+                    part.style.display = "block";
+                } else {
+                    part.style.display = "none";
+                }
+            });
+        });
+    </script>
+<!-- Bootstrap JS and dependencies -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    function removeFromCart(partId) {
+        fetch(`/remove-from-cart/${partId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            updateCartDisplay(data.cart);
+        });
+    }
+
+    // AJAX for cart management
+    document.querySelectorAll('.add-to-cart-form').forEach(form => {
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const partId = this.dataset.partId;
+        const quantityInput = this.querySelector('input[name="quantity"]');
+        const quantity = quantityInput.value;
+
+        // Validate that quantity is a number
+        if (isNaN(quantity) || quantity <= 0) {
+            alert("Please enter a valid quantity.");
+            return;
+        }
+
+        console.log(`Adding to cart: Part ID: ${partId}, Quantity: ${quantity}`); // Log the data
+
+        fetch(`/add-to-cart/${partId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': this.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ quantity: quantity })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            updateCartDisplay(data.cart);
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
+    });
+});
+
+    function updateCartDisplay(cart) {
+        const cartItems = document.getElementById('cart-items');
+        const totalAmount = cart.items.reduce((total, item) => total + item.total_price, 0);
+        
+        if (cart.items.length === 0) {
+            cartItems.innerHTML = '<p class="text-center">Your cart is empty.</p>';
+        } else {
+            cartItems.innerHTML = cart.items.map(item => `
+                <div class="cart-item mb-3">
+                    <div class="d-flex justify-content-between">
+                        <span>${item.part_name}</span>
+                        <span>₹${item.total_price}</span>
+                    </div>
+                    <div class="d-flex justify-content-between small">
+                        <span>Qty: ${item.quantity}</span>
+                        <a href="#" class="text-danger" onclick="removeFromCart(${item.part_id})">Remove</a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Update the total amount in the payment modal
+        document.getElementById('paymentAmount').innerText = totalAmount;
+    }
+</script>
+
+</body>
+</html>
