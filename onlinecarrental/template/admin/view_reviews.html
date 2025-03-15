@@ -1,0 +1,72 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+{% block extrahead %}
+    <!-- Add Bootstrap Icons if not in base.html -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0">All Reviews</h2>
+                </div>
+                <div class="card-body">
+                    {% if reviews %}
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover align-middle" id="reviewsTable">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Customer</th>
+                                        <th>Rating</th>
+                                        <th>Comments</th>
+                                        <th>Vehicle</th>
+                                        <th>Spare Part</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for review in reviews %}
+                                    <tr>
+                                        <td>{{ review.customer.user.username }}</td>
+                                        <td>{{ review.rating }}/5</td>
+                                        <td>{{ review.comments|default:"No comments" }}</td>
+                                        <td>
+                                            {% if review.vehicle %}
+                                                {{ review.vehicle.brand }} {{ review.vehicle.model }} ({{ review.vehicle.number_plate }})
+                                            {% else %}
+                                                <span class="text-muted">N/A</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if review.sparepart %}
+                                                {{ review.sparepart.part_name }} ({{ review.sparepart.category }})
+                                            {% else %}
+                                                <span class="text-muted">N/A</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ review.review_date|date:"Y-m-d H:i" }}</td>
+                                        <td>
+                                            <form method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this review?');">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="delete_review">
+                                                <input type="hidden" name="review_id" value="{{ review.id }}">
+                                                <button type="submit" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i> Delete</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No reviews have been submitted yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

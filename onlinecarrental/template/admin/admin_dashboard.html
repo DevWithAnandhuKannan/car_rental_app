@@ -1,7 +1,150 @@
 {% extends 'admin/base.html' %}
 {% load static %}
 {% block content %}
-    <h1>
-        anandhu
-    </h1>
+    <style>
+        .stat-card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .stat-number {
+            font-size: 1rem;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        .chart-container {
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid p-4" style="padding-left: 10;">
+        <h3 class="mb-4">Admin Dashboard</h3>
+        
+        <!-- Stats Row -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <h5>Total Vehicles</h5>
+                    <div class="stat-number">{{ total_vehicles }}</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <h5>Available Vehicles</h5>
+                    <div class="stat-number">{{ available_vehicles }}</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <h5>Booked Vehicles</h5>
+                    <div class="stat-number">{{ booked_vehicles }}</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <h5>Total Revenue</h5>
+                    <div class="stat-number">${{ total_revenue|floatformat:2 }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Second Stats Row -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <h5>Total Customers</h5>
+                    <div class="stat-number">{{ total_customers }}</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <h5>New Customers (30d)</h5>
+                    <div class="stat-number">{{ new_customers }}</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <h5>Active Bookings</h5>
+                    <div class="stat-number">{{ active_bookings }}</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <h5>Pending Orders</h5>
+                    <div class="stat-number">{{ pending_orders }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row mt-2">
+            <div class="col-md-3">
+                <div class="chart-container">
+                    <h5>Booking Status Distribution</h5>
+                    <canvas id="bookingChart"></canvas>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="chart-container">
+                    <h5>Vehicle Type Distribution</h5>
+                    <canvas id="vehicleChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Booking Status Chart
+        const bookingCtx = document.getElementById('bookingChart').getContext('2d');
+        const bookingData = {{ booking_status_data|safe }};
+        new Chart(bookingCtx, {
+            type: 'pie',
+            data: {
+                labels: bookingData.map(item => item.booking_status),
+                datasets: [{
+                    data: bookingData.map(item => item.count),
+                    backgroundColor: ['#3498db', '#e74c3c']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // Vehicle Type Chart
+        const vehicleCtx = document.getElementById('vehicleChart').getContext('2d');
+        const vehicleData = {{ vehicle_type_data|safe }};
+        new Chart(vehicleCtx, {
+            type: 'bar',
+            data: {
+                labels: vehicleData.map(item => item.vehicle_type),
+                datasets: [{
+                    label: 'Count',
+                    data: vehicleData.map(item => item.count),
+                    backgroundColor: '#2ecc71'
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
 {% endblock %}

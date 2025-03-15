@@ -2,91 +2,118 @@
 {% load static %}
 {% block content %}
 <div class="container mt-5">
-    <h2 class="mb-4">Admin Booking Management</h2>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Booking ID</th>
-                <th>Customer</th>
-                <th>Vehicle</th>
-                <th>Start Date</th>
-                <th>End Date</th>
-                <th>Total Price</th>
-                <th>Booking Status</th>
-                <th>Return Status</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for booking in bookings %}
-            <tr>
-                <td>{{ booking.id }}</td>
-                <td>{{ booking.customer.user.username }}</td>
-                <td>{{ booking.vehicle.brand }} {{ booking.vehicle.model }}</td>
-                <td>{{ booking.start_date }}</td>
-                <td>{{ booking.end_date }}</td>
-                <td>₹{{ booking.total_price }}</td>
-                <td>{{ booking.booking_status }}</td>
-                <td>{{ booking.return_status }}</td>
-                <td>
-                    {% if booking.booking_status == 'Confirmed' %}
-                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#startModal{{ booking.id }}">
-                        Start Booking
-                    </button>
-                    {% elif booking.booking_status == 'Started' and booking.return_status == 'Pending' %}
-                    <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#returnModal{{ booking.id }}">
-                        Return Vehicle
-                    </button>
-                    {% endif %}
-                </td>
-            </tr>
-
-            <!-- Start Booking Modal -->
-            <div class="modal fade" id="startModal{{ booking.id }}" tabindex="-1" aria-labelledby="startModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="startModalLabel">Start Booking</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <form method="POST" action="{% url 'start_booking' booking.id %}">
-                                {% csrf_token %}
-                                <div class="mb-3">
-                                    <label for="otp" class="form-label">Enter OTP</label>
-                                    <input type="text" class="form-control" id="otp" name="otp" required>
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">Admin Booking Management</h2>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle" id="bookingTable">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>Customer</th>
+                            <th>Vehicle</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Total Price</th>
+                            <th>Booking Status</th>
+                            <th>Return Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in bookings %}
+                        <tr>
+                            <td>{{ booking.id }}</td>
+                            <td>{{ booking.customer.user.username }}</td>
+                            <td>{{ booking.vehicle.brand }} {{ booking.vehicle.model }}</td>
+                            <td>{{ booking.start_date|date:"d M Y" }}</td>
+                            <td>{{ booking.end_date|date:"d M Y" }}</td>
+                            <td>₹{{ booking.total_price|floatformat:2 }}</td>
+                            <td>
+                                <span class="badge {% if booking.booking_status == 'Confirmed' %}bg-success{% elif booking.booking_status == 'Started' %}bg-info{% else %}bg-secondary{% endif %}">
+                                    {{ booking.booking_status }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge {% if booking.return_status == 'Returned' %}bg-success{% else %}bg-warning{% endif %}">
+                                    {{ booking.return_status }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    {% if booking.booking_status == 'Confirmed' %}
+                                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#startModal{{ booking.id }}">
+                                        <i class="bi bi-play-circle"></i> Start
+                                    </button>
+                                    {% elif booking.booking_status == 'Started' and booking.return_status == 'Pending' %}
+                                    <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#returnModal{{ booking.id }}">
+                                        <i class="bi bi-arrow-return-left"></i> Return
+                                    </button>
+                                    {% endif %}
                                 </div>
-                                <button type="submit" class="btn btn-primary">Validate OTP</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                            </td>
+                        </tr>
 
-            <!-- Return Vehicle Modal -->
-            <div class="modal fade" id="returnModal{{ booking.id }}" tabindex="-1" aria-labelledby="returnModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="returnModalLabel">Return Vehicle</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <form method="POST" action="{% url 'return_vehicle' booking.id %}">
-                                {% csrf_token %}
-                                <div class="mb-3">
-                                    <label for="condition" class="form-label">Vehicle Condition</label>
-                                    <textarea class="form-control" id="condition" name="condition" rows="3" required></textarea>
+                        <!-- Start Booking Modal -->
+                        <div class="modal fade" id="startModal{{ booking.id }}" tabindex="-1" aria-labelledby="startModalLabel{{ booking.id }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-primary text-white">
+                                        <h5 class="modal-title" id="startModalLabel{{ booking.id }}">Start Booking #{{ booking.id }}</h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form method="POST" action="{% url 'admin:start_booking' booking.id %}">
+                                            {% csrf_token %}
+                                            <div class="mb-3">
+                                                <label for="otp{{ booking.id }}" class="form-label fw-bold">Enter OTP</label>
+                                                <input type="text" class="form-control" id="otp{{ booking.id }}" name="otp" required>
+                                            </div>
+                                            <div class="d-flex justify-content-end gap-2">
+                                                <button type="submit" class="btn btn-primary">
+                                                    <i class="bi bi-check-circle"></i> Validate OTP
+                                                </button>
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            </div>
+                                        </form>
+                                    </div>
                                 </div>
-                                <button type="submit" class="btn btn-warning">Mark as Returned</button>
-                            </form>
+                            </div>
                         </div>
-                    </div>
-                </div>
+
+                        <!-- Return Vehicle Modal -->
+                        <div class="modal fade" id="returnModal{{ booking.id }}" tabindex="-1" aria-labelledby="returnModalLabel{{ booking.id }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-warning text-dark">
+                                        <h5 class="modal-title" id="returnModalLabel{{ booking.id }}">Return Vehicle #{{ booking.id }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form method="POST" action="{% url 'admin:return_vehicle' booking.id %}">
+                                            {% csrf_token %}
+                                            <div class="mb-3">
+                                                <label for="condition{{ booking.id }}" class="form-label fw-bold">Vehicle Condition</label>
+                                                <textarea class="form-control" id="condition{{ booking.id }}" name="condition" rows="3" required></textarea>
+                                            </div>
+                                            <div class="d-flex justify-content-end gap-2">
+                                                <button type="submit" class="btn btn-warning">
+                                                    <i class="bi bi-check-circle"></i> Mark as Returned
+                                                </button>
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
-            {% endfor %}
-        </tbody>
-    </table>
+        </div>
+    </div>
 </div>
-
 {% endblock %}

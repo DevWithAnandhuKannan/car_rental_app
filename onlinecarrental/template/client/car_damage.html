@@ -82,7 +82,8 @@
             document.getElementById("loading").style.display = "block";
             document.getElementById("result-container").style.display = "none";
 
-            fetch("/upload_image/", {
+
+            fetch("{% url 'admin:upload_image' %}", {
                 method: "POST",
                 body: formData,
                 credentials: 'include' // Ensure cookies (like CSRF token) are sent

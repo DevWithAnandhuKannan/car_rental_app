@@ -5,225 +5,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Rent-a-Ride - Car Rentals</title>
+    <title>Car Rental</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <style>
-        /* Custom Theme Variables */
+        /* Custom Amazon-like Styles */
         :root {
-            --primary-color: #007bff;    /* Vibrant Blue */
-            --secondary-color: #6c757d;  /* Neutral Gray */
-            --accent-color: #28a745;     /* Success Green */
-            --dark-bg: #1a1a2e;         /* Deep Navy */
-            --light-bg: #f8f9fa;        /* Light Gray */
-            --warning-color: #046dff;   /* Amber */
-            --danger-color: #dc3545;    /* Red */
+            --amazon-orange: #FF9900;
+            --amazon-dark: #131921;
+            --amazon-light: #F3F3F3;
         }
 
-        body {
-            background-color: var(--light-bg);
-            font-family: 'Roboto', sans-serif;
-            color: #333;
+        .offcanvas-lg {
+            width: 280px;
+            background-color: var(--amazon-light);
         }
 
-        /* Navbar Adjustments */
-        .navbar {
-            background-color: var(--dark-bg) !important;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        /* Sidebar Styling */
-        #sidebar {
-            max-width: 300px;
-            background: var(--dark-bg);
-            margin-top:40px;
-            border-right: 1px solid rgba(255,255,255,0.1);
-            transition: all 0.3s ease;
-        }
-
-        .offcanvas-title {
-            color: var(--warning-color);
-            font-weight: 600;
-            letter-spacing: 1px;
-        }
-
-        .offcanvas-body {
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .form-label {
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            color: var(--warning-color);
-            font-weight: 500;
-        }
-
-        .form-select {
-            background: #2a2a3a;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 10px;
-            transition: all 0.3s ease;
-        }
-
-        .form-select:focus {
-            border-color: var(--warning-color);
-            box-shadow: 0 0 8px rgba(255,193,7,0.3);
-            background: #2a2a3a;
-        }
-
-        .btn-warning {
-            background: var(--warning-color);
-            color: var(--dark-bg);
-            font-weight: 600;
-            border-radius: 8px;
-            padding: 12px;
-            transition: all 0.3s ease;
-        }
-
-        .btn-warning:hover {
-            background: #ffdd57;
-            color: #000;
-            transform: translateY(-2px);
-        }
-
-        /* Content Area */
         .content {
-            margin-top: 10vh;
+            margin-top:10vh;
             margin-left: 300px;
-            padding: 30px;
+            padding: 20px;
             background-color: white;
             min-height: 90vh;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            overflow:scroll;
         }
 
-        /* Card Styling */
         .card {
-            border: none;
-            border-radius: 12px;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            background: white;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid #ddd;
         }
 
         .card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
 
         .card-img-top {
-            height: 220px;
+            height: 200px;
             object-fit: cover;
-            transition: transform 0.3s ease;
-        }
-
-        .card:hover .card-img-top {
-            transform: scale(1.05);
-        }
-
-        .card-body {
-            padding: 20px;
-        }
-
-        .card-title {
-            color: var(--dark-bg);
-            font-weight: 600;
-            font-size: 1.25rem;
         }
 
         .price {
-            color: var(--danger-color);
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin: 10px 0;
+            color: #B12704;
+            font-size: 1.4rem;
+            font-weight: bold;
         }
 
         .btn-primary {
-            background-color: var(--primary-color);
-            border: none;
-            border-radius: 8px;
-            padding: 10px 20px;
-            font-weight: 500;
-            transition: all 0.3s ease;
+            background-color: var(--amazon-orange);
+            border-color: var(--amazon-orange);
         }
 
         .btn-primary:hover {
-            background-color: #0056b3;
-            transform: translateY(-2px);
-        }
-
-        .btn-info {
-            background-color: var(--secondary-color);
-            border: none;
-            border-radius: 8px;
-            padding: 10px 20px;
-            color: white;
-            transition: all 0.3s ease;
-        }
-
-        .btn-info:hover {
-            background-color: #5a6268;
-            color: white;
-            transform: translateY(-2px);
-        }
-
-        /* Modal Styling */
-        .modal-content {
-            border-radius: 12px;
-            border: none;
-            box-shadow: 0 5px 25px rgba(0,0,0,0.2);
-        }
-
-        .modal-header {
-            background: var(--dark-bg);
-            color: white;
-            border-bottom: none;
-        }
-
-        .modal-title {
-            font-weight: 600;
-        }
-
-        .modal-body {
-            padding: 25px;
-        }
-
-        .form-control {
-            border-radius: 8px;
-            border: 1px solid #ddd;
-            padding: 10px;
-            transition: all 0.3s ease;
-        }
-
-        .form-control:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 8px rgba(0,123,255,0.2);
-        }
-
-        /* Filter Toggle Button */
-        .filter-toggle {
-            bottom: 20px;
-            right: 20px;
-            z-index: 1000;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: var(--primary-color);
+            background-color: #ff8f00;
+            border-color: #ff8f00;
         }
 
         /* Responsive Adjustments */
         @media (max-width: 991.98px) {
             .content {
                 margin-left: 0;
-                margin-top: 80px;
-                padding: 20px;
+                padding-top: 80px;
             }
 
             .offcanvas-lg {
@@ -242,32 +83,74 @@
                 transform: none;
             }
         }
+        #sidebar {
+        max-width: 300px;
+        background: #1e1e2d; 
+        color: white;
+    }
+
+    .offcanvas-title {
+        color: #ffc107; 
+    }
+
+    .offcanvas-body {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .form-label {
+        font-size: 14px;
+        text-transform: uppercase;
+        color: #000000;
+    }
+
+    .form-select {
+        background: #2a2a3a;
+        color: white;
+    }
+
+    .form-select:focus {
+        border-color: #ffdd57;
+        box-shadow: 0 0 5px #ffc107;
+    }
+
+    .btn-warning {
+        font-weight: bold;
+        background: #ffc107;
+        color: #1e1e2d;
+        border: none;
+        transition: 0.3s;
+    }
+
+    .btn-warning:hover {
+        background: #ffdd57;
+        color: black;
+    }
     </style>
 </head>
-
+{% include 'navbar.html' %}
 <body class="bg-light h-90">
-    {% include 'navbar.html' %}
-
     <!-- Mobile Filter Toggle -->
     <button class="btn btn-primary d-lg-none position-fixed filter-toggle rounded-circle shadow" 
             type="button" 
             data-bs-toggle="offcanvas" 
             data-bs-target="#sidebar"
-            aria-label="Toggle filters">
-        <i class="bi bi-funnel-fill"></i>
+            aria-label="Open filters">
+        <i class="bi bi-funnel"></i>
     </button>
 
     <!-- Sidebar/Offcanvas -->
     <div class="offcanvas-lg offcanvas-start" tabindex="-1" id="sidebar">
         <div class="offcanvas-header">
-            <h5 class="offcanvas-title">Filter Your Ride</h5>
-            <button type="button" class="btn-close d-lg-none text-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            <h5 class="offcanvas-title">Filter Cars</h5>
+            <button type="button" class="btn-close d-lg-none" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body p-3">
             <div class="mb-3">
-                <label class="form-label">Fuel Type</label>
+                <label class="form-label fw-bold">Fuel Type</label>
                 <select id="fuelFilter" class="form-select">
-                    <option value="All">All Types</option>
+                    <option value="All">All</option>
                     <option value="Petrol">Petrol</option>
                     <option value="Diesel">Diesel</option>
                     <option value="Electric">Electric</option>
@@ -275,18 +158,18 @@
             </div>
     
             <div class="mb-3">
-                <label class="form-label">Transmission</label>
+                <label class="form-label fw-bold">Transmission</label>
                 <select id="transmissionFilter" class="form-select">
-                    <option value="All">All Types</option>
+                    <option value="All">All</option>
                     <option value="Manual">Manual</option>
                     <option value="Automatic">Automatic</option>
                 </select>
             </div>
     
             <div class="mb-3">
-                <label class="form-label">Availability</label>
+                <label class="form-label fw-bold">Availability</label>
                 <select id="availabilityFilter" class="form-select">
-                    <option value="All">All Statuses</option>
+                    <option value="All">All</option>
                     <option value="Available">Available</option>
                     <option value="Booked">Booked</option>
                     <option value="Maintenance">Maintenance</option>
@@ -294,34 +177,28 @@
             </div>
     
             <button class="btn btn-warning w-100 mt-3" onclick="filterCars()">
-                <i class="bi bi-funnel-fill me-2"></i>Apply Filters
+                <i class="bi bi-funnel"></i> Apply Filters
             </button>
         </div>
     </div>
 
     <!-- Main Content -->
     <div class="content">
-        <h2 class="mb-4 text-dark fw-bold">Available Vehicles</h2>
         <div class="row g-4" id="carContainer">
             {% for car in cars %}
-            <div class="col-12 col-sm-6 col-md-4 col-lg-4 col-xl-3 car-card" 
-                 data-fuel="{{ car.fuel_type }}"
-                 data-transmission="{{ car.transmission_type }}" 
-                 data-availability="{{ car.availability }}">
+            <div class="col-12 col-sm-6 col-md-4 col-lg-4 col-xl-3 car-card" data-fuel="{{ car.fuel_type }}"
+                data-transmission="{{ car.transmission_type }}" data-availability="{{ car.availability }}">
                 <div class="card mb-4 shadow-sm">
-                    <img src="{{ car.image.url }}" class="card-img-top img-fluid" alt="{{ car.brand }} {{ car.model }}">
+                    <img src="{{ car.image.url }}" class="card-img-top img-fluid" alt="{{ car.brand }} {{ car.model }}" style="height: 200px; object-fit: cover;">
                     <div class="card-body">
                         <h5 class="card-title">{{ car.brand }} {{ car.model }}</h5>
                         <p class="card-text">
-                            <span class="badge bg-secondary me-1">{{ car.transmission_type }}</span>
-                            <span class="badge bg-info">{{ car.fuel_type }}</span>
-                            <br>
-                            <small class="text-muted">Mileage: {{ car.mileage }} km/l</small>
-                            <br>
-                            <span class="price">₹{{ car.price_per_day }}/day</span>
+                            <strong>Category:</strong> {{ car.transmission_type }} | {{ car.fuel_type }} <br>
+                            <strong>Mileage:</strong> {{ car.mileage }} km/l <br>
+                            <span class="price">Price per day: ₹{{ car.price_per_day }}</span>
                         </p>
                         <div class="d-flex justify-content-between">
-                            <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#detailsModal{{ car.id }}">Details</button>
+                            <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#detailsModal{{ car.id }}">View Details</button>
                             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bookModal{{ car.id }}">Book Now</button>
                         </div>
                     </div>
@@ -334,7 +211,7 @@
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title" id="detailsModalLabel{{ car.id }}">{{ car.brand }} {{ car.model }}</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                             <div class="row">
@@ -348,12 +225,8 @@
                                     <p><strong>Fuel Type:</strong> {{ car.fuel_type }}</p>
                                     <p><strong>Transmission:</strong> {{ car.transmission_type }}</p>
                                     <p><strong>Mileage:</strong> {{ car.mileage }} km/l</p>
-                                    <p><strong>Availability:</strong> 
-                                        <span class="badge {% if car.availability == 'Available' %}bg-success{% elif car.availability == 'Booked' %}bg-warning{% else %}bg-danger{% endif %}">
-                                            {{ car.availability }}
-                                        </span>
-                                    </p>
-                                    <p><strong>Price:</strong> ₹{{ car.price_per_day }}/day</p>
+                                    <p><strong>Availability:</strong> {{ car.availability }}</p>
+                                    <p><strong>Price per Day:</strong> ₹{{ car.price_per_day }}</p>
                                 </div>
                             </div>
                         </div>
@@ -369,11 +242,11 @@
             <div class="modal fade" id="bookModal{{ car.id }}" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog modal-lg modal-fullscreen-sm-down">
                     <div class="modal-content">
-                        <form method="POST" action="{% url 'book_vehicle' car.id %}">
+                        <form method="POST" action="{% url 'user:book_vehicle' car.id %}">
                             {% csrf_token %}
                             <div class="modal-header">
                                 <h5 class="modal-title">Book {{ car.brand }} {{ car.model }}</h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                             </div>
                             <div class="modal-body">
                                 <input type="hidden" name="vehicle_id" value="{{ car.id }}">
@@ -389,23 +262,17 @@
                                 </div>
                                 <label class="fw-bold">Street</label>
                                 <input type="text" name="street" class="form-control mb-3" required>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <label class="fw-bold">City</label>
-                                        <input type="text" name="city" class="form-control mb-3" required>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="fw-bold">State</label>
-                                        <input type="text" name="state" class="form-control mb-3" required>
-                                    </div>
-                                </div>
+                                <label class ="fw-bold">City</label>
+                                <input type="text" name="city" class="form-control mb-3" required>
+                                <label class="fw-bold">State</label>
+                                <input type="text" name="state" class="form-control mb-3" required>
                                 <label class="fw-bold">Postal Code</label>
                                 <input type="text" name="postal_code" class="form-control mb-3" required>
                                 <label class="fw-bold">Email</label>
                                 <input type="email" name="email" class="form-control mb-3" value="{{ request.user.email }}" readonly>
                                 <label class="fw-bold">Phone Number</label>
                                 <input type="text" name="phone" class="form-control mb-3" value="{{ request.user.customer.phone|default:'' }}" required>
-                                <label class="fw-bold">Driving License</label>
+                                <label class="fw-bold">Driving Licence Number</label>
                                 <input type="text" name="driving_licence" class="form-control mb-3" value="{{ request.user.customer.drivers_license|default:'' }}" required>
                                 <div class="row">
                                     <div class="col-12 col-md-6 mb-3">
@@ -417,7 +284,7 @@
                                         <input type="date" name="end_date" id="endDate{{ car.id }}" class="form-control" required onchange="validateDates('{{ car.id }}'); checkAvailability('{{ car.id }}'); calculatePrice(this, {{ car.price_per_day }})">
                                     </div>
                                 </div>
-                                <div id="availabilityMessage{{ car.id }}" class="mt-2"></div>
+                                <div id="availabilityMessage{{ car.id }}" class="mt-2 text-danger"></div>
                                 <label class="fw-bold">Total Price (₹)</label>
                                 <input type="text" name="total_price" id="totalPrice{{ car.id }}" class="form-control" readonly>
                             </div>
@@ -435,17 +302,19 @@
                 <div class="modal-dialog modal-lg modal-fullscreen-sm-down">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title">Secure Payment</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            <h5 class="modal-title">UPI Payment</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
-                        <div class="modal-body text-center">
-                            <img src="{% static 'images/upi-logo.png' %}" alt="UPI Logo" class="img-fluid mb-3" style="max-width: 100px;">
-                            <h4>Scan to Pay</h4>
-                            <img src="{% static 'images/qr-code.png' %}" alt="QR Code" class="img-fluid mb-3" style="max-width: 200px;">
-                            <p class="text-muted">Or</p>
-                            <h4>Enter UPI ID</h4>
-                            <input type="text" class="form-control mb-3 mx-auto" placeholder="example@upi" required style="max-width: 300px;">
-                            <button class="btn btn-success w-100" onclick="confirmPayment('{{ car.id }}')">Confirm Payment</button>
+                        <div class="modal-body">
+                            <div class="text-center">
+                                <img src="{% static 'images/upi-logo.png' %}" alt="UPI Logo" class="img-fluid mb-3" style="max-width: 100px;">
+                                <h4>Scan to Pay</h4>
+                                <img src="{% static 'images/qr-code.png' %}" alt="QR Code" class="img-fluid mb-3" style="max-width: 200px;">
+                                <p>Or</p>
+                                <h4>Enter UPI ID</h4>
+                                <input type="text" class="form-control mb-3" placeholder="Enter UPI ID" required>
+                                <button class="btn btn-success w-100" onclick="confirmPayment('{{ car.id }}')">Pay Now</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -456,21 +325,30 @@
 
     <script>
         function filterCars() {
-            const fuelFilter = document.getElementById("fuelFilter").value;
-            const transmissionFilter = document.getElementById("transmissionFilter").value;
-            const availabilityFilter = document.getElementById("availabilityFilter").value;
-            const cars = document.querySelectorAll(".car-card");
+            let fuelFilter = document.getElementById("fuelFilter").value;
+            let transmissionFilter = document.getElementById("transmissionFilter").value;
+            let availabilityFilter = document.getElementById("availabilityFilter").value;
+
+            let cars = document.querySelectorAll(".car-card");
 
             cars.forEach(car => {
-                const fuelType = car.getAttribute("data-fuel");
-                const transmissionType = car.getAttribute("data-transmission");
-                const availability = car.getAttribute("data-availability");
+                let fuelType = car.getAttribute("data-fuel");
+                let transmissionType = car.getAttribute("data-transmission");
+                let availability = car.getAttribute("data-availability");
 
-                const matchesFuel = fuelFilter === "All" || fuelType === fuelFilter;
-                const matchesTransmission = transmissionFilter === "All" || transmissionType === transmissionFilter;
-                const matchesAvailability = availabilityFilter === "All" || availability === availabilityFilter;
+                let showCar = true;
 
-                car.style.display = (matchesFuel && matchesTransmission && matchesAvailability) ? "block" : "none";
+                if (fuelFilter !== "All" && fuelType !== fuelFilter) {
+                    showCar = false;
+                }
+                if (transmissionFilter !== "All" && transmissionType !== transmissionFilter) {
+                    showCar = false;
+                }
+                if (availabilityFilter !== "All" && availability !== availabilityFilter) {
+                    showCar = false;
+                }
+
+                car.style.display = showCar ? "block" : "none";
             });
         }
 
@@ -480,47 +358,43 @@
             const totalPrice = document.querySelector(`#bookModal${carId} input[name="total_price"]`).value;
 
             if (!startDate || !endDate || !totalPrice) {
-                alert("Please complete all booking details before proceeding.");
+                alert("Please fill all fields before proceeding to payment.");
                 return;
             }
 
             const bookingModal = bootstrap.Modal.getInstance(document.getElementById(`bookModal${carId}`));
             bookingModal.hide();
+
             const paymentModal = new bootstrap.Modal(document.getElementById(`paymentModal${carId}`));
             paymentModal.show();
         }
 
         function confirmPayment(carId) {
-            alert("Payment successful! Your vehicle is booked.");
+            alert("Payment successful! Your booking is confirmed.");
+            const paymentModal = bootstrap.Modal.getInstance(document.getElementById(`paymentModal${carId}`));
+            paymentModal.hide();
             document.querySelector(`#bookModal${carId} form`).submit();
         }
 
         function validateDates(carId) {
-            const startDate = document.getElementById(`startDate${carId}`).value;
-            const endDate = document.getElementById(`endDate${carId}`).value;
-            const messageDiv = document.getElementById(`availabilityMessage${carId}`);
+            let startDate = document.getElementById(`startDate${carId}`).value;
+            let endDate = document.getElementById(`endDate${carId}`).value;
+            let messageDiv = document.getElementById(`availabilityMessage${carId}`);
 
             if (startDate && endDate) {
-                const start = new Date(startDate);
-                const end = new Date(endDate);
-                const today = new Date();
+                let start = new Date(startDate);
+                let end = new Date(endDate);
 
-                if (start < today.setHours(0,0,0,0)) {
-                    messageDiv.innerHTML = "Start date cannot be in the past.";
-                    messageDiv.classList.add('text-danger');
-                    document.getElementById(`startDate${carId}`).value = "";
-                    return false;
-                }
                 if (start >= end) {
-                    messageDiv.innerHTML = "End date must be after start date.";
-                    messageDiv.classList.add('text-danger');
-                    document.getElementById(`endDate${carId}`).value = "";
+                    messageDiv.innerHTML = "End Date must be after Start Date.";
+                    messageDiv.style.color = "red";
+                    document.getElementById(`endDate${carId}`).value = ""; // Reset invalid input
                     return false;
+                } else {
+                    messageDiv.innerHTML = "";
                 }
-                messageDiv.innerHTML = "";
-                return true;
             }
-            return false;
+            return true;
         }
 
         function checkAvailability(carId) {
@@ -532,31 +406,32 @@
                 fetch(`/check-availability/${carId}/?start_date=${startDate}&end_date=${endDate}`)
                     .then(response => response.json())
                     .then(data => {
-                        availabilityMessage.textContent = data.available 
-                            ? "Vehicle available for your dates!" 
-                            : "Sorry, vehicle not available.";
-                        availabilityMessage.classList.toggle('text-success', data.available);
-                        availabilityMessage.classList.toggle('text-danger', !data.available);
-                    })
-                    .catch(error => {
-                        availabilityMessage.textContent = "Error checking availability.";
-                        availabilityMessage.classList.add('text-danger');
+                        if (data.available) {
+                            availabilityMessage.textContent = "Vehicle is available for the selected dates.";
+                            availabilityMessage.classList.remove('text-danger');
+                            availabilityMessage.classList.add('text-success');
+                        } else {
+                            availabilityMessage.textContent = "Vehicle is not available for the selected dates.";
+                            availabilityMessage.classList.remove('text-success');
+                            availabilityMessage.classList.add('text-danger');
+                        }
                     });
             }
         }
 
         function calculatePrice(input, pricePerDay) {
-            const startDate = input.form.start_date.value;
-            const endDate = input.value;
-            const totalPriceField = document.getElementById(`totalPrice${input.form.vehicle_id.value}`);
-
-            if (startDate && endDate && validateDates(input.form.vehicle_id.value)) {
-                const diff = (new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24);
-                totalPriceField.value = (diff * pricePerDay).toFixed(2);
-            } else {
-                totalPriceField.value = "";
+            let startDate = input.form.start_date.value;
+            let endDate = input.value;
+            if (startDate && endDate) {
+                let diff = (new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24) + 1; // Include both days
+                    if (diff > 0) {
+                        document.getElementById(`totalPrice${input.form.vehicle_id.value}`).value = diff * pricePerDay;
+                    } else {
+                        document.getElementById(`totalPrice${input.form.vehicle_id.value}`).value = '';
+                        alert("End date must be after start date.");
+                    }
+                }
             }
-        }
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

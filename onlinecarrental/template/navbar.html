@@ -1,140 +1,72 @@
 {% load static %}
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top" id="mainNav">
-    <div class="container">
-        <!-- Brand -->
-        <a class="navbar-brand d-flex align-items-center" href="{% url 'index' %}">
-            <span>Rent-a-Ride</span>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top shadow-sm py-1" id="mainNav">
+    <div class="container-fluid px-2">
+        <!-- Brand (Left) -->
+        <a class="navbar-brand fw-bold fs-5" href="{% url 'user:index' %}">
+            Rent-a-Ride
         </a>
-        
+
         <!-- Toggler for Mobile -->
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" 
                 aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
-            <i class="fas fa-bars"></i>
+            <span class="navbar-toggler-icon"></span>
         </button>
 
         <!-- Navbar Items -->
         <div class="collapse navbar-collapse" id="navbarResponsive">
-            <ul class="navbar-nav ms-auto align-items-center">
-                <!-- Main Navigation Links -->
+            <!-- Centered Navigation Links -->
+            <ul class="navbar-nav mx-auto fs-6">
                 <li class="nav-item">
-                    <a class="nav-link" href="#services">
-                        <i class="fas fa-car me-1"></i>Services
-                    </a>
+                    <a class="nav-link" href="#services">Services</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#about">
-                        <i class="fas fa-info-circle me-1"></i>About
-                    </a>
+                    <a class="nav-link" href="#about">About</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#contact">
-                        <i class="fas fa-envelope me-1"></i>Contact
-                    </a>
+                    <a class="nav-link" href="#contact">Contact</a>
                 </li>
 
-                <!-- User-specific Navigation -->
+                <!-- User-specific Navigation (Centered, Authenticated Only) -->
                 {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'car_list' %}">
-                            <i class="fas fa-car-side me-1"></i>Book Vehicle
-                        </a>
+                        <a class="nav-link" href="{% url 'user:car_list' %}">Book Vehicle</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'spare_parts' %}">
-                            <i class="fas fa-tools me-1"></i>Spare Parts
-                        </a>
+                        <a class="nav-link" href="{% url 'user:spare_parts' %}">Spare Parts</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'user:vehicle_reviews' %}">Review</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="userBookings" role="button" 
                            data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-history me-1"></i>My Bookings
+                            My Bookings
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userBookings">
-                            <li><a class="dropdown-item" href="{% url 'booking_list' %}">Current Bookings</a></li>
-                            <li><a class="dropdown-item" href="{% url 'order_history' %}">Rental History</a></li>
+                            <li><a class="dropdown-item small" href="{% url 'user:booking_list' %}">Current Bookings</a></li>
+                            <li><a class="dropdown-item small" href="{% url 'user:order_history' %}">Rental History</a></li>
                         </ul>
                     </li>
                     <li class="nav-item">
-                        <span class="nav-link text-light">Welcome, {{ user.username }}</span>
+                        <span class="nav-link text-light small">Welcome, {{ user.username }}</span>
                     </li>
+                {% endif %}
+            </ul>
+
+            <!-- Right-aligned Buttons -->
+            <ul class="navbar-nav ms-auto">
+                {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="btn btn-danger btn-sm ms-2" href="{% url 'logout' %}">
-                            <i class="fas fa-sign-out-alt me-1"></i>Logout
-                        </a>
+                        <a class="btn btn-danger btn-sm" href="{% url 'user:logout' %}">Logout</a>
                     </li>
                 {% else %}
-                    <li class="nav-item d-flex gap-2 mt-2 mt-lg-0">
-                        <a class="btn btn-primary btn-sm" href="{% url 'login' %}">
-                            <i class="fas fa-sign-in-alt me-1"></i>Login
-                        </a>
-                        <a class="btn btn-outline-light btn-sm" href="{% url 'signup' %}">
-                            <i class="fas fa-user-plus me-1"></i>Signup
-                        </a>
+                    <li class="nav-item d-flex gap-2">
+                        <a class="btn btn-primary btn-sm" href="{% url 'user:login' %}">Login</a>
+                        <a class="btn btn-outline-light btn-sm" href="{% url 'user:signup' %}">Signup</a>
                     </li>
                 {% endif %}
             </ul>
         </div>
     </div>
 </nav>
-
-<!-- Custom CSS -->
-<style>
-    #mainNav {
-        padding: 1rem 0;
-        transition: padding 0.3s;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .navbar-brand {
-        font-weight: 700;
-        font-size: 1.5rem;
-    }
-
-    .nav-link {
-        padding: 0.5rem 1rem;
-        transition: color 0.3s ease;
-    }
-
-    .nav-link:hover {
-        color: #0d6efd !important;
-    }
-
-    .dropdown-menu {
-        background-color: #212529;
-        border: none;
-    }
-
-    .dropdown-item {
-        color: #fff;
-    }
-
-    .dropdown-item:hover {
-        background-color: #343a40;
-        color: #0d6efd;
-    }
-
-    @media (max-width: 991px) {
-        .navbar-collapse {
-            padding: 1rem;
-            background-color: #212529;
-        }
-        
-        .nav-item {
-            margin: 0.5rem 0;
-        }
-    }
-</style>
-
-<!-- Custom JavaScript -->
-<script>
-    // Navbar shrink on scroll
-    window.addEventListener('scroll', function() {
-        const navbar = document.getElementById('mainNav');
-        if (window.scrollY > 100) {
-            navbar.style.padding = '0.5rem 0';
-        } else {
-            navbar.style.padding = '1rem 0';
-        }
-    });
-</script>

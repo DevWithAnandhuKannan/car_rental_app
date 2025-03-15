@@ -49,10 +49,12 @@ class Customer(models.Model):
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        # Ensure at least one default address exists
-        if not self.addresses.filter(is_default=True).exists():
-            self.addresses.first().is_default = True
-            self.addresses.first().save()
+        # Ensure at least one default address exists, but only if there are any addresses
+        if self.addresses.exists():  # Check if any addresses exist first
+            if not self.addresses.filter(is_default=True).exists():
+                first_address = self.addresses.first()
+                first_address.is_default = True
+                first_address.save()
 
 from django.utils import timezone
 from datetime import timedelta
@@ -78,15 +80,6 @@ class Booking(models.Model):
         return f"Booking {self.id} - {self.customer.user.username} - {self.vehicle.brand} {self.vehicle.model}"
 
 
-# Review Model
-class Review(models.Model):
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    rating = models.IntegerField()
-    comments = models.TextField(blank=True, null=True)
-    review_date = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Review {self.id} - {self.customer.user.username} - {self.vehicle.brand}"
 
 # Spare Parts Model
 class SparePart(models.Model):
@@ -103,6 +96,8 @@ class SparePart(models.Model):
 
     def __str__(self):
         return f"{self.part_name} ({self.category})"
+    def is_in_stock(self, quantity=1):
+        return self.stock_quantity >= quantity
 
 # Order Model
 class Order(models.Model):
@@ -129,3 +124,17 @@ class Order(models.Model):
 
     def __str__(self):
         return f"Order {self.id} - {self.customer.user.username} - {self.part.part_name}"
+    
+
+
+# Review Model
+class Review(models.Model):
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, null=True, blank=True)  # Optional
+    sparepart = models.ForeignKey(SparePart, on_delete=models.CASCADE, null=True, blank=True)  # Optional
+    rating = models.IntegerField()
+    comments = models.TextField(blank=True, null=True)
+    review_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Review {self.id} - {self.customer.user.username}"

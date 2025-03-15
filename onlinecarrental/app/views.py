@@ -1,10 +1,15 @@
 import json
 import string
-import aiohttp
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.models import User
-
+from django.shortcuts import render, redirect
+from django.contrib.auth.models import User
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.hashers import check_password, make_password
+from functools import wraps
 from django.views.generic import TemplateView
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
@@ -14,14 +19,9 @@ from django.contrib import messages
 from .models import Vehicle, Booking
 from datetime import datetime
 import random
-from .decorators import login_required_session
 from django.http import JsonResponse
 from datetime import datetime, timedelta
 from django.shortcuts import render
-from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile
-import os
-
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.contrib import messages
@@ -32,16 +32,34 @@ from .models import SparePart, Customer, Address, Order
 import requests
 from django.shortcuts import redirect
 from django.contrib import messages
-
-import os
 import json
-import base64
 import requests
 from django.http import JsonResponse
 from django.shortcuts import render
-from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile
-from django.conf import settings  # Ensure you have settings configured
+from functools import wraps
+
+
+def check_admin_log(request):
+    return 'admin_id' in request.session
+
+def check_user_log(request):
+    return 'user_id' in request.session
+
+def user_required(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if check_user_log(request):
+            return view_func(request, *args, **kwargs)
+        return redirect('login')
+    return wrapper
+
+def admin_required(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if check_admin_log(request):
+            return view_func(request, *args, **kwargs)
+        return redirect('admin_login')
+    return wrapper
 
 
 def check_car(request):
@@ -68,7 +86,6 @@ def upload_image(request):
             if 'error' in flask_response:
                 return JsonResponse({'error': flask_response['error']}, status=400)
             else:
-                # Rename 'image' to 'result_image' for HTML compatibility
                 return JsonResponse({
                     'result_image': flask_response['image'],
                     'prediction': flask_response['prediction']
@@ -78,7 +95,6 @@ def upload_image(request):
             return JsonResponse({'error': f'Failed to connect to detection service: {str(e)}'}, status=500)
 
     return JsonResponse({'error': 'No image uploaded'}, status=400)
-
 
 def admin_booking_list(request):
     bookings = Booking.objects.all()
@@ -117,6 +133,7 @@ def return_vehicle(request, booking_id):
 def order_list(request):
     orders = Order.objects.all()  # Admin can see all orders
     return render(request, 'admin/order_list.html', {'orders': orders})
+
 
 def update_order_status(request, order_id):
     order = get_object_or_404(Order, id=order_id)
@@ -167,10 +184,7 @@ def refund_order(request, order_id):
         messages.error(request, "This order cannot be refunded.")
 
     return redirect('order_list')
-# def order_list(request):
-#     # Fetch all orders with related vehicle details
-#     orders = Order.objects.select_related('part').all()  # Assuming 'part' is the SparePart model
-#     return render(request, 'admin/order_list.html', {'orders': orders})
+
 
 def report_defect(request, order_id):
     if request.method == 'POST':
@@ -184,23 +198,11 @@ def report_defect(request, order_id):
         return redirect('order_history')  # Redirect back to order history
 
 
-# def cancel_order(request, order_id):
-#     order = get_object_or_404(Order, id=order_id, customer__user=request.user)
-
-#     if order.order_status == 'Pending':
-#         order.order_status = 'Cancelled'
-#         order.save()
-#         messages.success(request, "Your order has been cancelled.")
-#     else:
-#         messages.error(request, "You can only cancel pending orders.")
-
-#     return redirect('order_history')  # Redirect back to the order history page
-
-
 def spare_parts(request):
     parts = SparePart.objects.filter(stock_quantity__gt=0)
     cart_data = get_cart_data(request)  # Get cart data to pass to the template
     return render(request, 'client/spare_parts.html', {'parts': parts, 'cart': cart_data})
+
 
 def remove_from_cart(request, part_id):
     if request.method == 'POST':
@@ -216,6 +218,7 @@ def remove_from_cart(request, part_id):
             'cart': get_cart_data(request)
         })
     return JsonResponse({'status': 'error'})
+
 
 def add_to_cart(request, part_id):
     if request.method == 'POST':
@@ -244,6 +247,7 @@ def add_to_cart(request, part_id):
             'cart': get_cart_data(request)
         })
     return JsonResponse({'status': 'error'})
+
 
 def get_cart_data(request):
     cart = request.session.get('cart', {})
@@ -334,10 +338,10 @@ def checkout(request):
         'cart_total': cart_data['total']
     })
 
+
 def order_history(request):
     orders = Order.objects.filter(customer__user=request.user).order_by('-id')
     return render(request, 'client/order_history.html', {'orders': orders})
-
 
 
 def cancel_booking(request, booking_id):
@@ -351,7 +355,6 @@ def cancel_booking(request, booking_id):
         messages.error(request, "Cancellation not allowed. Must be at least 2 days before start date")
     
     return redirect('booking_list')
-
 
 def get_unavailable_dates(request, car_id):
     # Fetch all bookings for the vehicle
@@ -368,6 +371,8 @@ def get_unavailable_dates(request, car_id):
             current_date += timedelta(days=1)
 
     return JsonResponse({'unavailable_dates': unavailable_dates})
+
+
 def generate_otp():
     return ''.join(random.choices(string.digits, k=6))
 
@@ -385,9 +390,10 @@ def booking_list(request):
         messages.error(request, "Customer profile not found")
         return redirect('home')
 
-
 def book_vehicle(request, car_id):
+    print('reached')
     if request.method == 'POST':
+        print('reached')
         user = request.user
         customer, created = Customer.objects.get_or_create(user=user)
 
@@ -450,14 +456,17 @@ def book_vehicle(request, car_id):
 
     return redirect('car_list')
 
+from django.contrib.auth.decorators import login_required
 
 def car_list(request):
     cars = Vehicle.objects.all()
     return render(request, 'client/car_list.html', {'cars': cars})
 
+
 def car_details(request, car_id):
     car = get_object_or_404(Vehicle, id=car_id)
     return render(request, 'client/car_details.html', {'car': car})
+
 
 def check_availability(request, car_id):
     start_date = request.GET.get('start_date')
@@ -477,6 +486,7 @@ def check_availability(request, car_id):
 
         return JsonResponse({'available': not overlapping_bookings})
     return JsonResponse({'available': False})
+
 
 def spare_parts_list(request):
     spare_parts = SparePart.objects.all()
@@ -529,7 +539,6 @@ def delete_spare_part(request, part_id):
     spare_part.delete()
     return redirect('spare_parts_list')
 
-
 def vehicle_list(request):
     query = request.GET.get('q', '').strip()
     vehicles = Vehicle.objects.filter(
@@ -542,7 +551,6 @@ def vehicle_list(request):
     
     return render(request, 'admin/vehicle_list.html', {'vehicles': vehicles, 'query': query})
 
-# Add a new vehicle
 def add_vehicle(request):
     if request.method == "POST":
         required_fields = ['brand', 'model', 'number_plate', 'price_per_day', 'mileage', 'fuel_type', 'transmission_type', 'availability']
@@ -573,7 +581,6 @@ def add_vehicle(request):
     
     return render(request, 'admin/add_vehicle.html')
 
-# Update vehicle
 def update_vehicle(request, vehicle_id):
     print('called update vehicle')
     vehicle = get_object_or_404(Vehicle, id=vehicle_id)
@@ -607,7 +614,6 @@ def update_vehicle(request, vehicle_id):
 
     return render(request, 'admin/update_vehicle.html', {'vehicle': vehicle})
 
-# Delete vehicle
 def delete_vehicle(request, vehicle_id):
     vehicle = get_object_or_404(Vehicle, id=vehicle_id)
     vehicle.delete()
@@ -615,21 +621,9 @@ def delete_vehicle(request, vehicle_id):
     return redirect('vehicle_list')
 
 
-# Home Page View
 class IndexView(TemplateView):
     template_name = 'index.html'
 
-    # def get(self, request, *args, **kwargs):
-    #     if not request.user.is_authenticated:
-    #         return redirect('login')  # Redirect if not logged in
-    #     return super().get(request, *args, **kwargs)
-
-from django.shortcuts import render, redirect
-from django.contrib.auth.models import User
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import update_session_auth_hash
-from django.contrib.auth.hashers import check_password, make_password
 
 def view_admin_account(request):
         admin_id = request.session.get('admin_id')
@@ -718,7 +712,7 @@ def login_view(request):
 
     return render(request, 'login.html', {'error_message': error_message})
 
-# Signup View
+
 def signup_view(request):
     if request.user.is_authenticated or 'user_id' in request.session:
         return redirect('index')
@@ -726,9 +720,6 @@ def signup_view(request):
     error_message = None
 
     if request.method == 'POST':
-        print(request.POST)
-        print('---------------------------------------------------------------------')
-
         email = request.POST.get('email')
         password1 = request.POST.get('password1')
         password2 = request.POST.get('password2')
@@ -754,7 +745,6 @@ def signup_view(request):
                 return redirect('index')
 
     return render(request, 'signup.html', {'error_message': error_message})
-
 
 
 def logout_view(request):

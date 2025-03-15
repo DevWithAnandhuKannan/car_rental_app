@@ -1,168 +1,185 @@
 {% extends 'admin/base.html' %}
 {% load static %}
+{% block extrahead %}
+    <!-- Add Bootstrap Icons if not in base.html -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+{% endblock %}
 {% block content %}
 <div class="container mt-4">
-    <h2>Vehicle Management</h2>
-    
-    <!-- Search Bar -->
-    <input type="text" id="searchInput" class="form-control mb-3" placeholder="Search vehicles..." onkeyup="searchVehicles()">
-    
-    <!-- Button to Open the Modal -->
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#vehicleModal" onclick="resetForm()">
-        Add Vehicle
-    </button>
-    
-    <!-- Vehicle Table -->
-    <table class="table table-bordered mt-3" id="vehicleTable">
-        <thead>
-            <tr>
-                <th>image</th>
-                <th>Brand</th>
-                <th>Model</th>
-                <th>Number Plate</th>
-                <th>Price/Day</th>
-                <th>Mileage</th>
-                <th>Fuel Type</th>
-                <th>Transmission</th>
-                <th>Availability</th>
-                <th>Vehicle Type</th>
-                <th>Features</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for vehicle in vehicles %}
-            <tr>
-                <td><img src="{% if vehicle.image %}{{ vehicle.image.url }}{% else %}https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png{% endif %}" 
-     alt="{{ vehicle.brand }}" 
-     style="width: 100px;"></td>
-                <td>{{ vehicle.brand }}</td>
-                <td>{{ vehicle.model }}</td>
-                <td>{{ vehicle.number_plate }}</td>
-                <td>{{ vehicle.price_per_day }}</td>
-                <td>{{ vehicle.mileage }}</td>
-                <td>{{ vehicle.fuel_type }}</td>
-                <td>{{ vehicle.transmission_type }}</td>
-                <td>{{ vehicle.availability }}</td>
-                <td>{{ vehicle.vehicle_type }}</td>
-                <td>{{ vehicle.features }}</td>
-                <td>
-                    <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#vehicleModal" 
-                    onclick="editVehicle(
-                        '{{ vehicle.id|escapejs }}',
-                        '{{ vehicle.brand|escapejs }}',
-                        '{{ vehicle.model|escapejs }}',
-                        '{{ vehicle.number_plate|escapejs }}',
-                        '{{ vehicle.price_per_day|escapejs }}',
-                        '{{ vehicle.mileage|escapejs }}',
-                        '{{ vehicle.fuel_type|escapejs }}',
-                        '{{ vehicle.transmission_type|escapejs }}',
-                        '{{ vehicle.availability|escapejs }}',
-                        '{{ vehicle.vehicle_type|escapejs }}',
-                        '{{ vehicle.features|escapejs }}',
-                        '{% if vehicle.image %}{{ vehicle.image.url|escapejs }}{% endif %}'
-                    )">
-                        Edit
-                    </button>
-                    <a href="/delete_vehicle/{{ vehicle.id }}/" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this vehicle?');">Delete</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">Vehicle Management</h2>
+        </div>
+        <div class="card-body">
+            <!-- Search Bar -->
+            <div class="input-group mb-3">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="text" id="searchInput" class="form-control" placeholder="Search vehicles..." onkeyup="searchVehicles()">
+            </div>
+
+            <!-- Button to Open the Modal -->
+            <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#vehicleModal" onclick="resetForm()">
+                <i class="bi bi-plus-circle"></i> Add Vehicle
+            </button>
+
+            <!-- Vehicle Table -->
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="vehicleTable">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Image</th>
+                            <th>Brand</th>
+                            <th>Model</th>
+                            <th>Number Plate</th>
+                            <th>Price/Day</th>
+                            <th>Mileage</th>
+                            <th>Fuel Type</th>
+                            <th>Transmission</th>
+                            <th>Availability</th>
+                            <th>Vehicle Type</th>
+                            <th>Features</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for vehicle in vehicles %}
+                        <tr>
+                            <td>
+                                <img src="{% if vehicle.image %}{{ vehicle.image.url }}{% else %}{% static 'images/default-vehicle.jpg' %}{% endif %}" 
+                                    alt="{{ vehicle.brand }}" 
+                                    class="img-fluid rounded" 
+                                    style="max-width: 100px;">
+                            </td>
+                            <td>{{ vehicle.brand }}</td>
+                            <td>{{ vehicle.model }}</td>
+                            <td>{{ vehicle.number_plate }}</td>
+                            <td>₹{{ vehicle.price_per_day|floatformat:2 }}</td>
+                            <td>{{ vehicle.mileage }} km</td>
+                            <td>{{ vehicle.fuel_type }}</td>
+                            <td>{{ vehicle.transmission_type }}</td>
+                            <td>
+                                <span class="badge {% if vehicle.availability == 'Available' %}bg-success{% elif vehicle.availability == 'Booked' %}bg-warning{% else %}bg-danger{% endif %}">
+                                    {{ vehicle.availability }}
+                                </span>
+                            </td>
+                            <td>{{ vehicle.vehicle_type }}</td>
+                            <td>{{ vehicle.features }}</td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#vehicleModal" 
+                                        onclick="editVehicle(
+                                            '{{ vehicle.id|escapejs }}',
+                                            '{{ vehicle.brand|escapejs }}',
+                                            '{{ vehicle.model|escapejs }}',
+                                            '{{ vehicle.number_plate|escapejs }}',
+                                            '{{ vehicle.price_per_day|escapejs }}',
+                                            '{{ vehicle.mileage|escapejs }}',
+                                            '{{ vehicle.fuel_type|escapejs }}',
+                                            '{{ vehicle.transmission_type|escapejs }}',
+                                            '{{ vehicle.availability|escapejs }}',
+                                            '{{ vehicle.vehicle_type|escapejs }}',
+                                            '{{ vehicle.features|escapejs }}',
+                                            '{% if vehicle.image %}{{ vehicle.image.url|escapejs }}{% else %}{% static 'images/default-vehicle.jpg' %}{% endif %}'
+                                        )">
+                                        <i class="bi bi-pencil"></i> Edit
+                                    </button>
+                                    <a href="{% url 'admin:delete_vehicle' vehicle.id %}" 
+                                       class="btn btn-danger btn-sm" 
+                                       onclick="return confirm('Are you sure you want to delete this vehicle?');">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Vehicle Modal -->
 <div class="modal fade" id="vehicleModal" tabindex="-1" aria-labelledby="vehicleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title" id="vehicleModalLabel">Add Vehicle</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form method="POST" enctype="multipart/form-data" id="vehicleForm">
                     {% csrf_token %}
                     <input type="hidden" name="vehicle_id" id="vehicle_id">
                     
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="brand" class="form-label">Brand</label>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="brand" class="form-label fw-bold">Brand</label>
                             <input type="text" class="form-control" id="brand" name="brand" required>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="model" class="form-label">Model</label>
+                        <div class="col-md-6">
+                            <label for="model" class="form-label fw-bold">Model</label>
                             <input type="text" class="form-control" id="model" name="model" required>
                         </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="number_plate" class="form-label">Number Plate</label>
+                        <div class="col-md-6">
+                            <label for="number_plate" class="form-label fw-bold">Number Plate</label>
                             <input type="text" class="form-control" id="number_plate" name="number_plate" required>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="price_per_day" class="form-label">Price per Day</label>
-                            <input type="number" class="form-control" id="price_per_day" name="price_per_day" required>
+                        <div class="col-md-6">
+                            <label for="price_per_day" class="form-label fw-bold">Price per Day (₹)</label>
+                            <input type="number" class="form-control" id="price_per_day" name="price_per_day" step="0.01" required>
                         </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="mileage" class="form-label">Mileage</label>
-                            <input type="number" class="form-control" id="mileage" name="mileage" required>
+                        <div class="col-md-6">
+                            <label for="mileage" class="form-label fw-bold">Mileage (km)</label>
+                            <input type="number" class="form-control" id="mileage" name="mileage" step="0.01" required>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="fuel_type" class="form-label">Fuel Type</label>
-                            <select class="form-control" id="fuel_type" name="fuel_type">
+                        <div class="col-md-6">
+                            <label for="fuel_type" class="form-label fw-bold">Fuel Type</label>
+                            <select class="form-select" id="fuel_type" name="fuel_type" required>
                                 <option value="Petrol">Petrol</option>
                                 <option value="Diesel">Diesel</option>
                                 <option value="Electric">Electric</option>
                             </select>
                         </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="vehicle_type" class="form-label">Vehicle Type</label>
-                            <select class="form-control" id="vehicle_type" name="vehicle_type">
+                        <div class="col-md-6">
+                            <label for="vehicle_type" class="form-label fw-bold">Vehicle Type</label>
+                            <select class="form-select" id="vehicle_type" name="vehicle_type" required>
                                 <option value="Sedan">Sedan</option>
                                 <option value="SUV">SUV</option>
                                 <option value="Hatchback">Hatchback</option>
                                 <option value="Truck">Truck</option>
                             </select>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="features">Features</label>
-                            <textarea name="features" id="features" class="form-control"></textarea>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="transmission_type" class="form-label">Transmission</label>
-                            <select class="form-control" id="transmission_type" name="transmission_type">
+                        <div class="col-md-6">
+                            <label for="transmission_type" class="form-label fw-bold">Transmission</label>
+                            <select class="form-select" id="transmission_type" name="transmission_type" required>
                                 <option value="Manual">Manual</option>
                                 <option value="Automatic">Automatic</option>
                             </select>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="availability" class="form-label">Availability</label>
-                            <select class="form-control" id="availability" name="availability">
+                        <div class="col-md-6">
+                            <label for="availability" class="form-label fw-bold">Availability</label>
+                            <select class="form-select" id="availability" name="availability" required>
                                 <option value="Available">Available</option>
                                 <option value="Booked">Booked</option>
                                 <option value="Maintenance">Maintenance</option>
                             </select>
                         </div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="image" class="form-label">Image</label>
-                        <input type="file" class="form-control" id="image" name="image">
-                        <img id="currentImage" src="" style="max-width: 200px; margin-top: 10px; display: none;" alt="Current Vehicle Image">
+                        <div class="col-12">
+                            <label for="features" class="form-label fw-bold">Features</label>
+                            <textarea name="features" id="features" class="form-control" rows="3"></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label for="image" class="form-label fw-bold">Image</label>
+                            <input type="file" class="form-control" id="image" name="image" accept="image/*">
+                            <img id="currentImage" src="" class="img-fluid rounded mt-2" style="max-width: 200px; display: none;" alt="Current Vehicle Image">
+                        </div>
                     </div>
 
-                    <button type="submit" class="btn btn-success">Save</button>
+                    <div class="mt-3 d-flex justify-content-end gap-2">
+                        <button type="submit" class="btn btn-success"><i class="bi bi-save"></i> Save</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -190,10 +207,12 @@
         document.getElementById("transmission_type").value = transmission;
         document.getElementById("availability").value = availability;
         document.getElementById("vehicle_type").value = vehicleType;
-        document.getElementById("features").value = features;
-        document.getElementById("vehicleForm").action = `/update_vehicle/${id}/`;
+        document.getElementById("features").value = features || ''; // Handle null/undefined features
 
-        // Handle current image display
+        // Dynamically set the form action using Django URL
+        const baseUrl = "{% url 'admin:update_vehicle' 9999 %}".replace("9999", "${id}");
+        document.getElementById("vehicleForm").action = baseUrl.replace("${id}", id);
+
         const currentImage = document.getElementById("currentImage");
         if (imageURL) {
             currentImage.src = imageURL;
@@ -202,22 +221,16 @@
             currentImage.src = "";
             currentImage.style.display = "none";
         }
+        document.querySelector("#vehicleModalLabel").textContent = "Edit Vehicle";
     }
 
     function resetForm() {
         document.getElementById("vehicleForm").reset();
         document.getElementById("vehicle_id").value = "";
-        document.getElementById("fuel_type").selectedIndex = 0;
-        document.getElementById("transmission_type").selectedIndex = 0;
-        document.getElementById("availability").selectedIndex = 0;
-        document.getElementById("vehicle_type").selectedIndex = 0;
-        document.getElementById("features").value = "";
-        document.getElementById("image").value = "";
-        document.getElementById("vehicleForm").action = "/add_vehicle/";
-        // Reset image preview
+        document.getElementById("vehicleForm").action = "{% url 'admin:add_vehicle' %}";
         document.getElementById("currentImage").src = "";
         document.getElementById("currentImage").style.display = "none";
+        document.querySelector("#vehicleModalLabel").textContent = "Add Vehicle";
     }
 </script>
 {% endblock %}
-

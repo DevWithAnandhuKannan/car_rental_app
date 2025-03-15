@@ -54,7 +54,7 @@
         }
 
         .sb-sidenav {
-            width: var(--sidebar-width);
+            width: var(--sidebar-width-2);
             background-color: #212529;
             transition: width var(--transition-speed) ease;
         }
@@ -133,7 +133,7 @@
                     <i class="fas fa-user fa-fw"></i>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                    <li><a class="dropdown-item" href="/logout">Logout</a></li>
+                    <li><a class="dropdown-item" href="{% url 'admin:admin_logout' %}">Logout</a></li>
                 </ul>
             </li>
         </ul>
@@ -147,31 +147,35 @@
                 <div class="sb-sidenav-menu">
                     <div class="nav">
                         <div class="sb-sidenav-menu-heading">Core</div>
-                        <a class="nav-link" href="{% url 'admin_dashboard' %}">
+                        <a class="nav-link" href="{% url 'admin:admin_dashboard' %}">
                             <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
                             Dashboard
                         </a>
-                        <a class="nav-link" href="{% url 'vehicle_list' %}">
+                        <a class="nav-link" href="{% url 'user:vehicle_list' %}">
                             <div class="sb-nav-link-icon"><i class="fas fa-car"></i></div>
                             Vehicles
                         </a>
-                        <a class="nav-link" href="{% url 'admin_booking_list' %}">
+                        <a class="nav-link" href="{% url 'admin:admin_booking_list' %}">
                             <div class="sb-nav-link-icon"><i class="fas fa-calendar-check"></i></div>
                             Bookings
                         </a>
-                        <a class="nav-link" href="{% url 'spare_parts_list' %}">
+                        <a class="nav-link" href="{% url 'user:spare_parts_list' %}">
                             <div class="sb-nav-link-icon"><i class="fas fa-tools"></i></div>
                             Spare Parts
                         </a>
-                        <a class="nav-link" href="{% url 'order_list' %}">
+                        <a class="nav-link" href="{% url 'admin:vehicle_reviews' %}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-star"></i></div>
+                            Reviews
+                        </a>
+                        <a class="nav-link" href="{% url 'admin:order_list' %}">
                             <div class="sb-nav-link-icon"><i class="fas fa-shopping-cart"></i></div>
                             Orders
                         </a>
-                        <a class="nav-link" href="{% url 'check_car' %}">
+                        <a class="nav-link" href="{% url 'admin:check_car' %}">
                             <div class="sb-nav-link-icon"><i class="fas fa-car-crash"></i></div>
                             Check Damage
                         </a>
-                        <a class="nav-link" href="{% url 'view_admin_account' %}">
+                        <a class="nav-link" href="{% url 'admin:view_admin_account' %}">
                             <div class="sb-nav-link-icon"><i class="fas fa-user"></i></div>
                             Account
                         </a>
